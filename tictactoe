@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>s36nnnn's Tic-Tac-Toe</title>
+    <!-- Tailwind CSS for modern responsive utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        /* Neon glow effects for X and O */
+        .neon-x {
+            color: #38bdf8;
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+        }
+        .neon-o {
+            color: #f43f5e;
+            text-shadow: 0 0 15px rgba(244, 63, 94, 0.6);
+        }
+        .cell-hover:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        /* Custom modal transition */
+        .modal-fade {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-4 sm:p-6">
+
+    <header class="w-full max-w-md mx-auto text-center mt-4">
+        <h1 class="text-3xl sm:text-4xl font-black tracking-wider uppercase bg-gradient-to-r from-sky-400 to-rose-500 bg-clip-text text-transparent">
+            Tic-Tac-Toe
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Sleek neon web edition</p>
+
+        <!-- Scoreboard Bar -->
+        <div class="grid grid-cols-3 gap-3 mt-6 bg-slate-800/60 backdrop-blur border border-slate-700/50 p-3 rounded-2xl shadow-xl">
+            <div class="text-center">
+                <span class="block text-xs font-semibold text-sky-400 uppercase tracking-wider">Player X</span>
+                <span id="scoreX" class="text-xl sm:text-2xl font-bold">0</span>
+            </div>
+            <div class="text-center border-x border-slate-700">
+                <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Ties</span>
+                <span id="scoreTies" class="text-xl sm:text-2xl font-bold">0</span>
+            </div>
+            <div class="text-center">
+                <span class="block text-xs font-semibold text-rose-400 uppercase tracking-wider">Player O</span>
+                <span id="scoreO" class="text-xl sm:text-2xl font-bold">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-md mx-auto my-6 flex flex-col items-center">
+        <!-- Turn Status Indicator -->
+        <div id="turnIndicator" class="mb-5 text-sm sm:text-base font-medium px-5 py-2 rounded-full bg-slate-800/80 border border-slate-700 text-slate-200 shadow-sm flex items-center gap-2">
+            <span>Turn:</span>
+            <span id="currentTurnBadge" class="font-bold neon-x">Player X</span>
+        </div>
+
+        <!-- 3x3 Grid Board -->
+        <div class="grid grid-cols-3 gap-3 w-full aspect-square bg-slate-800/40 p-3 rounded-3xl border border-slate-700/50 shadow-2xl">
+            <button onclick="makeMove(0)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-0"></button>
+            <button onclick="makeMove(1)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-1"></button>
+            <button onclick="makeMove(2)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-2"></button>
+            <button onclick="makeMove(3)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-3"></button>
+            <button onclick="makeMove(4)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-4"></button>
+            <button onclick="makeMove(5)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-5"></button>
+            <button onclick="makeMove(6)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-6"></button>
+            <button onclick="makeMove(7)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-7"></button>
+            <button onclick="makeMove(8)" class="cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95" id="cell-8"></button>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex gap-3 w-full mt-6">
+            <button onclick="resetBoard()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-xl border border-slate-700 transition active:scale-98 shadow-md">
+                Clear Board
+            </button>
+            <button onclick="resetAllStats()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold py-3 px-4 rounded-xl border border-rose-500/20 transition active:scale-98">
+                Reset Scores
+            </button>
+        </div>
+    </main>
+
+    <div id="resultModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-xs rounded-3xl p-6 text-center shadow-2xl modal-fade">
+            <h3 id="modalTitle" class="text-2xl font-black mb-2"></h3>
+            <p id="modalDesc" class="text-slate-400 text-sm mb-6"></p>
+            <button onclick="closeModal()" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition active:scale-95">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let gameActive = true;
+        let scores = { X: 0, O: 0, ties: 0 };
+
+        const winConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]              // Diagonals
+        ];
+
+        function makeMove(index) {
+            if (!gameActive || board[index] !== "") return;
+
+            board[index] = currentPlayer;
+            const cellElement = document.getElementById(`cell-${index}`);
+            cellElement.textContent = currentPlayer;
+            
+            if (currentPlayer === "X") {
+                cellElement.classList.add("neon-x");
+            } else {
+                cellElement.classList.add("neon-o");
+            }
+
+            checkGameResult();
+        }
+
+        function checkGameResult() {
+            let roundWon = false;
+
+            for (let i = 0; i < winConditions.length; i++) {
+                const [a, b, c] = winConditions[i];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    roundWon = true;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                gameActive = false;
+                scores[currentPlayer]++;
+                updateScoreboard();
+                showModal(`Player ${currentPlayer} Wins! 🎉`, `Congratulations to Player ${currentPlayer} for securing three in a row.`);
+                return;
+            }
+
+            if (!board.includes("")) {
+                gameActive = false;
+                scores.ties++;
+                updateScoreboard();
+                showModal("It's a Tie! 🤝", "The board is completely filled with no winner.");
+                return;
+            }
+
+            // Switch turn
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            updateTurnIndicator();
+        }
+
+        function updateTurnIndicator() {
+            const badge = document.getElementById("currentTurnBadge");
+            badge.textContent = `Player ${currentPlayer}`;
+            if (currentPlayer === "X") {
+                badge.className = "font-bold neon-x";
+            } else {
+                badge.className = "font-bold neon-o";
+            }
+        }
+
+        function updateScoreboard() {
+            document.getElementById("scoreX").textContent = scores.X;
+            document.getElementById("scoreO").textContent = scores.O;
+            document.getElementById("scoreTies").textContent = scores.ties;
+        }
+
+        function showModal(title, desc) {
+            document.getElementById("modalTitle").textContent = title;
+            document.getElementById("modalDesc").textContent = desc;
+            document.getElementById("resultModal").classList.remove("hidden");
+            document.getElementById("resultModal").classList.add("flex");
+        }
+
+        function closeModal() {
+            document.getElementById("resultModal").classList.remove("flex");
+            document.getElementById("resultModal").classList.add("hidden");
+            resetBoard();
+        }
+
+        function resetBoard() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentPlayer = "X";
+            updateTurnIndicator();
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                cell.textContent = "";
+                cell.className = "cell-hover w-full h-full bg-slate-800/80 rounded-2xl flex items-center justify-center text-4xl sm:text-6xl font-black transition-all duration-200 border border-slate-700/60 active:scale-95";
+            }
+        }
+
+        function resetAllStats() {
+            scores = { X: 0, O: 0, ties: 0 };
+            updateScoreboard();
+            resetBoard();
+        }
+    </script>
+</body>
+</html>
